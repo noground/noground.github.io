@@ -1,7 +1,8 @@
 # 两人一起 · 网站源码备份
 
-本仓库保存「菲菲和屯屯」点餐网站的源码和项目配图。原有 `index.html` 保留。
+本仓库保存「菲菲和屯屯」点餐网站的源码和项目配图。经所有者确认，仓库已设为公开并启用 GitHub Pages。main 分支的原有 `index.html` 保留。
 
+- GitHub 浏览版：https://noground.github.io/?look=cute
 - 点餐网站：https://feifei-tuntun-table.wudi0971.chatgpt.site/?look=cute
 - 独立管理页：https://feifei-tuntun-table.wudi0971.chatgpt.site/manage?look=cute
 - 完整源码：[two-little-shops](./two-little-shops/)
@@ -22,4 +23,6 @@
 进入 `two-little-shops`，按项目 README 安装依赖、初始化独立本地数据库后运行。
 项目使用 Vinext、Cloudflare Workers 和 D1；原 `.openai/hosting.json` 保留用于标识已有 Sites 项目。创建独立站点前应重新配置自己的托管身份与存储绑定。
 
-这次只保存备份，未开启或更改 GitHub Pages。GitHub Pages 不能直接运行本项目的后台、数据库或上传功能；保存源码不等于完整网站已在 GitHub 上线。原 Sites 网址及其部署保持不变。
+GitHub Pages 已开启，从 `gh-pages` 分支根目录发布静态浏览版。可以浏览三处空间、查看菜单和配料、试选数量；实际下单、昵称账号、订单记录、评价及图片管理继续使用原 Sites 网站。试选购物袋不会自动转移，前往原站后需要重新选餐。
+
+GitHub 浏览版当前采用第 8 版源码中的默认菜单、文字和配图，不会自动同步管理页后续的修改。GitHub Pages 不运行后台或数据库，国内网络访问质量仍需实际验证。原 Sites 网址、部署和线上数据保持不变。
