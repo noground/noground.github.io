@@ -1,0 +1,6 @@
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+export const users=sqliteTable('users',{id:text('id').primaryKey(),nickname:text('nickname').notNull().unique(),salt:text('salt').notNull(),pinHash:text('pin_hash').notNull(),role:text('role').notNull()});
+export const sessions=sqliteTable('sessions',{token:text('token').primaryKey(),userId:text('user_id').notNull().references(()=>users.id),expires:integer('expires').notNull()});
+export const overrides=sqliteTable('overrides',{id:text('id').primaryKey(),data:text('data').notNull()});
+export const orders=sqliteTable('orders',{id:text('id').primaryKey(),userId:text('user_id').notNull().references(()=>users.id),nickname:text('nickname').notNull(),items:text('items').notNull(),total:integer('total').notNull(),note:text('note').notNull(),status:text('status').notNull(),createdAt:text('created_at').notNull(),rating:integer('rating'),review:text('review').notNull().default(''),requestId:text('request_id').notNull().unique()});
+export const limits=sqliteTable('limits',{key:text('key').primaryKey(),attempts:integer('attempts').notNull(),reset:integer('reset').notNull()});
