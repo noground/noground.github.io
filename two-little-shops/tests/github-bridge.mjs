@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {githubBridge,GITHUB_ORIGIN} from '../app/github-bridge.ts';
+const token='nickname.'+'12345678-1234-1234-1234-123456789abc'.repeat(2);
+const incoming=(message,origin=GITHUB_ORIGIN)=>new Request('https://shop.example/api/github',{method:'POST',headers:{Origin:origin,'Content-Type':'text/plain',Cookie:'table_session=legacy-owner','oai-authenticated-user-id':'owner','oai-authenticated-user-email':'owner@example.com'},body:JSON.stringify(message)});
+let calls=0;
+const handler=async req=>{calls++;assert.equal(req.headers.get('oai-authenticated-user-id'),null);assert.equal(req.headers.get('oai-authenticated-user-email'),null);assert.equal(req.headers.get('origin'),'https://shop.example');assert.equal(req.headers.get('cookie'),new URL(req.url).pathname==='/api/orders'?'table_session='+token:null);return Response.json({ok:true},new URL(req.url).pathname==='/api/auth'?{headers:{'Set-Cookie':'table_session='+token+'; HttpOnly; Path=/; SameSite=Lax'}}:{});};
+assert.equal((await githubBridge(incoming({path:'orders',method:'GET',token},'https://evil.example'),handler)).status,403);
+for(const message of [{path:'menu',method:'POST'},{path:'content',method:'POST'},{path:'orders?all=1',method:'GET'},{path:'github',method:'POST'},{path:'boot',method:'GET',token:'legacy-owner'}])assert.notEqual((await githubBridge(incoming(message),handler)).status,200);
+assert.equal(calls,0);
+const auth=await githubBridge(incoming({path:'auth',method:'POST',body:{nickname:'小猫'}}),handler);assert.equal(auth.headers.get('Access-Control-Allow-Origin'),GITHUB_ORIGIN);assert.equal(auth.headers.get('Set-Cookie'),null);assert.equal((await auth.json()).token,token);
+const orders=await githubBridge(incoming({path:'orders',method:'GET',token}),handler);assert.equal(orders.status,200);
+console.log('PASS: exact origin, visitor-only actions/tokens, owner-header and cookie isolation, CORS, and nickname session exchange.');

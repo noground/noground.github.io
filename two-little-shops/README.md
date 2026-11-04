@@ -1,5 +1,15 @@
 # 菲菲和屯屯 · 点餐初版
 
+## GitHub 点餐站（第 9 版）
+
+`https://noground.github.io/?look=cute` 支持选择或新建昵称、多份下单、留言、订单记录、再来一单、确认吃好与评价。菜单、页面文字和上传配图读取原站，两个网址共用 D1 数据；各地址需各选一次昵称，同名昵称读取同一组订单。
+
+GitHub 通过仅允许 `https://noground.github.io` 的 `/api/github` 访客接口连接原后台。不转发平台身份或店主 Cookie，不支持管理操作。普通昵称会话只在 HTTPS 请求体中传输，不放入网址，也不依赖跨站 Cookie；原站店主登录和独立管理页保持不变。
+
+运行 `node scripts/build-github-pages.mjs` 生成 `work/github-pages-live/dist`，发布到 GitHub 的 `gh-pages` 分支。网络不能连接原后台时，页面明确提示，不能离线提交订单；国内网络质量仍需实际验证。
+
+检查：`node --experimental-strip-types tests/github-bridge.mjs`、`node --experimental-strip-types tests/github-client.mjs`、`node tests/github-orders.mjs`。最后一个检查只使用本地数据库，验收后清理新建昵称和订单。
+
 ## 图片与文字管理（第 8 版）
 
 管理页单独使用 `/manage?look=cute`，点餐网站不显示管理入口。旧的 `?space=manage` 收藏链接会跳转到新地址。使用创建网站的 ChatGPT 账号进行店主登录；店主不必先选昵称就可以管理。普通点餐人继续只选昵称，不能修改页面内容。

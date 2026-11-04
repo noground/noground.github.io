@@ -1,28 +1,18 @@
-# 两人一起 · 网站源码备份
+# 两人一起 · 点餐网站
 
-本仓库保存「菲菲和屯屯」点餐网站的源码和项目配图。经所有者确认，仓库已设为公开并启用 GitHub Pages。main 分支的原有 `index.html` 保留。
-
-- GitHub 浏览版：https://noground.github.io/?look=cute
-- 点餐网站：https://feifei-tuntun-table.wudi0971.chatgpt.site/?look=cute
-- 独立管理页：https://feifei-tuntun-table.wudi0971.chatgpt.site/manage?look=cute
+- GitHub 点餐地址：https://noground.github.io/?look=cute
+- 原网站：https://feifei-tuntun-table.wudi0971.chatgpt.site/?look=cute
+- 管理页：https://feifei-tuntun-table.wudi0971.chatgpt.site/manage?look=cute
 - 完整源码：[two-little-shops](./two-little-shops/)
-- 开发和功能说明：[项目 README](./two-little-shops/README.md)
 
-## 备份版本
+GitHub 页面已接入原站后台，支持昵称、多份下单、订单记录、确认吃好、评价及再来一单；菜单、文字及上传配图与原站共用。两个地址各选一次相同昵称即可查看同一组订单。管理只在原管理页开放。不能连接原后台时会提示网络错误，不能离线保存订单。国内直连效果仍需实测。
 
-2026 年 11 月 4 日，Sites 第 8 版，原始源码提交 `79f134fdc88dc8a296d6f269fc37f885b12a6c4e`，共 152 个项目文件。
-包含 Safari 图片上传修复、独立 `/manage` 管理网址、三个空间、菜单、订单和评价的实现，以及场景配图。
+## 源码备份
 
-## 备份范围
+2026 年 11 月 5 日，Sites 第 9 版，源提交 c8d1a5d9ef0920f0afaf55b42e15a053b3939876。源码、项目配图和数据库迁移保存在 main 分支；网页产物从 gh-pages 分支发布。main 原有 index.html 保留。
 
-此处保存源码、依赖锁定文件、初始菜单、数据库结构与迁移文件、项目配图；不包含线上数据库、用户昵称、订单、评价、后台修改的文字或上传照片，也不包含登录会话、访问令牌、本地运行数据或 node_modules。
-线上数据继续存放于原网站的 D1 数据库。恢复时需另外备份和导入线上数据。
+线上用户、订单、评价、后台上传照片、登录会话及凭据不备份到 GitHub；这些数据仍存于原站 D1。
 
-## 使用
+## 构建和验证
 
-进入 `two-little-shops`，按项目 README 安装依赖、初始化独立本地数据库后运行。
-项目使用 Vinext、Cloudflare Workers 和 D1；原 `.openai/hosting.json` 保留用于标识已有 Sites 项目。创建独立站点前应重新配置自己的托管身份与存储绑定。
-
-GitHub Pages 已开启，从 `gh-pages` 分支根目录发布静态浏览版。可以浏览三处空间、查看菜单和配料、试选数量；实际下单、昵称账号、订单记录、评价及图片管理继续使用原 Sites 网站。试选购物袋不会自动转移，前往原站后需要重新选餐。
-
-GitHub 浏览版当前采用第 8 版源码中的默认菜单、文字和配图，不会自动同步管理页后续的修改。GitHub Pages 不运行后台或数据库，国内网络访问质量仍需实际验证。原 Sites 网址、部署和线上数据保持不变。
+进入 two-little-shops，安装依赖后运行 node scripts/build-github-pages.mjs，发布 work/github-pages-live/dist 到 gh-pages。开发与测试见项目 README。

@@ -1,5 +1,6 @@
 import {defaultContent,normalizeContent,type SiteContent} from '../../content';
 import { env } from 'cloudflare:workers';
+import {githubBridge} from '../../github-bridge';
 import { dishes as defaults, shops as defaultShops, buildCartLine, retiredDishIds, type Dish, type Shop, type User } from '../../data';
 export const dynamic='force-dynamic';
 const json=(data:unknown,status=200,headers:Record<string,string>={})=>Response.json(data,{status,headers:{'Cache-Control':'no-store',...headers}});
@@ -22,7 +23,7 @@ async function contentState(){
 }
 async function resolvePhoto(value:string,key:string){if(value==='/api/photo/'+key){const row=await env.DB!.prepare('SELECT data FROM overrides WHERE id=?').bind(key).first<{data:string}>();return row?JSON.parse(row.data).image:value;}return value;}
 function imageValid(value:string){return value.length<=240000&&(/^(\/images\/[a-z0-9-]+\.(?:jpg|jpeg|png|webp|svg)|https:\/\/[^\s]+)$/.test(value)||/^data:image\/(jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(value));}
-async function handle(req:Request){try{
+async function handle(req:Request){if(new URL(req.url).pathname==='/api/github')return githubBridge(req,handle);try{
  if(!env.DB)return json({error:'数据服务暂时不可用，请稍后重试'},503);
  const path=new URL(req.url).pathname.replace('/api/','');
  if(req.method!=='GET'){const origin=req.headers.get('origin');if(origin&&origin!==new URL(req.url).origin)fail('请从小店页面内操作',403);if(Number(req.headers.get('content-length')||0)>300000)fail('图片太大，请选择更小的图片',413);}
@@ -89,4 +90,4 @@ async function handle(req:Request){try{
  }
  return json({error:'没有找到这个操作'},404);
  }catch(e:any){if(!e.status)console.error('Shop API:',e);return json({error:e.status?e.message:(e.message?.includes('份数')||e.message?.includes('口味')?e.message:'暂时没能完成，请稍后再试')},e.status||400);}}
-export const GET=handle;export const POST=handle;export const PATCH=handle;
+export const GET=handle;export const POST=handle;export const PATCH=handle;export const OPTIONS=handle;
