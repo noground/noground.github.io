@@ -1,12 +1,7 @@
-# 两人一起 · GitHub 浏览版
+# 两人一起 · GitHub 点餐站
 
-访问：https://noground.github.io/?look=cute
+https://noground.github.io/?look=cute
 
-这里提供菲菲饮品店、屯屯小厨房和家庭观影角的静态浏览版，可查看餐品介绍、配料并试选数量。
-实际下单、昵称账号、订单记录、评价和图片管理继续使用原站：https://feifei-tuntun-table.wudi0971.chatgpt.site/?look=cute
-试选购物袋仅存当前浏览器，前往原站后需要重新选餐；这里不会提交或保存线上订单。
+菜单、昵称、订单、评价及上传图片与原 Sites 网站共用 D1 数据。请选同一个昵称查看自己的记录。管理页继续在原网站。使用 app/shop-api.ts 连接受限访客接口，不依赖跨站 Cookie，不提供管理权限。网络无法连接原后台时会明确提示，不会把本地试选误作已保存订单。
 
-此分支只发布网页构建产物；完整后台源码备份仍在 main 分支的 two-little-shops 文件夹。当前浏览内容取自 Sites 第 8 版源码默认内容，不会自动同步管理页之后的修改或上传照片。
-GitHub Pages 使用 gh-pages 分支根目录发布。大陆网络是否顺畅仍需实际验证。
-
-素材出处见 CREDITS.md。
+构建：在源码目录安装依赖后运行 node scripts/build-github-pages.mjs，发布 work/github-pages-live/dist 到 gh-pages 分支。
