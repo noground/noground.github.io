@@ -35,6 +35,8 @@ assert.equal((await guest('orders',{items:[{...items[0],id:'latte'}],requestId:c
 const requestId=crypto.randomUUID();const created=await guest('orders',{items,note:'验收订单：多份、混合小店',requestId});assert.equal(created.status,200);
 const duplicate=await guest('orders',{items,requestId});assert.equal(duplicate.data.id,created.data.id);
 const records=await guest('orders');assert.equal(records.data.length,1);const order=records.data[0];assert.equal(order.total,8400);assert.equal(order.items[0].quantity,2);assert.equal(order.nickname,'验收食客'+suffix);assert.equal(order.note,'验收订单：多份、混合小店');
+assert.equal(order.email_status,'not_configured');
+assert.equal((await guest('mail-settings')).status,403);assert.equal((await guest('mail-test',{})).status,403);
 assert.equal((await guest('orders?all=1')).status,403);
 assert.equal((await guest('menu',{dish:latte})).status,403);assert.equal((await pickedOwner('menu',{dish:latte})).status,403);
 assert.equal((await owner('order',{id:order.id,rating:5,review:'不允许替别人评价'},'PATCH')).status,403);

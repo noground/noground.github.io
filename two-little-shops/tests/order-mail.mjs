@@ -1,0 +1,19 @@
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {deliverKitchenEmail,hasKitchenItems,mailConfigured,orderMailParams} from '../app/order-mail.ts';
+const config={EMAILJS_SERVICE_ID:'test_service',EMAILJS_TEMPLATE_ID:'test_template',EMAILJS_PUBLIC_KEY:'test_public',EMAILJS_PRIVATE_KEY:'test_private',ORDER_MAIL_FROM:'sender@163.com',ORDER_MAIL_TUNTUN_TO:'recipient@163.com'};
+const kitchen={shop:'tuntun',name:'番茄炒蛋',quantity:2,options:{口味:'少盐'}},coffee={shop:'feifei',name:'橙C美式',quantity:1,options:{温度:'冰'}};
+assert.equal(hasKitchenItems([coffee]),false);assert.equal(hasKitchenItems([kitchen,coffee]),true);assert.equal(mailConfigured(config),true);assert.equal(mailConfigured({...config,EMAILJS_PRIVATE_KEY:''}),false);
+const sqlite=new DatabaseSync(':memory:');sqlite.exec('CREATE TABLE orders(id TEXT PRIMARY KEY,nickname TEXT,items TEXT,total INTEGER,note TEXT,created_at TEXT,email_status TEXT,email_attempts INTEGER DEFAULT 0,email_error TEXT DEFAULT \'\',email_sent_at TEXT);');
+const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async run(){const r=sqlite.prepare(sql).run(...args);return{meta:{changes:Number(r.changes)}};},async first(){return sqlite.prepare(sql).get(...args)||null;}};}};
+const order={id:'order-123456',nickname:'小猫',items:[kitchen,coffee],total:5400,note:'不要香菜',created_at:'2026-11-05T12:00:00.000Z'};
+function seed(id,items=order.items){sqlite.prepare('INSERT INTO orders(id,nickname,items,total,note,created_at,email_status) VALUES(?,?,?,?,?,?,?)').run(id,order.nickname,JSON.stringify(items),order.total,order.note,order.created_at,'pending');}
+const params=orderMailParams(order,config);assert(params.order_summary.includes('番茄炒蛋 × 2'));assert(params.order_summary.includes('橙C美式 × 1'));assert.equal(params.order_note,'不要香菜');assert.equal(params.order_total,'¥54.00');assert.equal(params.from_email,config.ORDER_MAIL_FROM);assert.equal(params.to_email,config.ORDER_MAIL_TUNTUN_TO);assert(!readFileSync('docs/order-email-template.html','utf8').includes('{{{'));
+let sends=0;const send=async(url,request)=>{sends++;assert.equal(url,'https://api.emailjs.com/api/v1.0/email/send');const body=JSON.parse(request.body);assert.equal(body.accessToken,'test_private');assert.equal(body.template_params.to_email,config.ORDER_MAIL_TUNTUN_TO);return new Response('OK');};
+seed(order.id);await Promise.all([deliverKitchenEmail(db,config,order.id,send),deliverKitchenEmail(db,config,order.id,send)]);await deliverKitchenEmail(db,config,order.id,send);assert.equal(sends,1);const sent=sqlite.prepare('SELECT * FROM orders WHERE id=?').get(order.id);assert.equal(sent.email_status,'sent');assert.equal(sent.email_attempts,1);assert(sent.email_sent_at);
+seed('coffee',[coffee]);await deliverKitchenEmail(db,config,'coffee',send);assert.equal(sends,1);assert.equal(sqlite.prepare('SELECT email_status FROM orders WHERE id=?').get('coffee').email_status,'not_required');
+seed('failed');await deliverKitchenEmail(db,config,'failed',async()=>new Response('do not store provider details',{status:429}));assert.equal(sqlite.prepare('SELECT email_error FROM orders WHERE id=?').get('failed').email_error,'provider_http_429');
+seed('unknown');await deliverKitchenEmail(db,config,'unknown',async()=>{throw Error('network');});await deliverKitchenEmail(db,config,'unknown',send);assert.equal(sqlite.prepare('SELECT email_status FROM orders WHERE id=?').get('unknown').email_status,'unknown');assert.equal(sends,1);
+seed('disabled');await deliverKitchenEmail(db,{},'disabled',send);assert.equal(sends,1);
+sqlite.close();console.log('PASS: kitchen/mixed order routing, mail contents, database claim deduplication, disabled configuration, rejected sends, and uncertain-delivery handling. No real mail sent.');

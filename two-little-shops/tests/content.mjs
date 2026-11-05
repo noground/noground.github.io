@@ -17,6 +17,7 @@ if(process.argv.includes('--preview')){
  const before=(await request('boot')).data;let revision=before.contentRevision,changed=false;
  try{
   assert.equal(before.dishes.length,9);assert.equal(before.canManage,false);assert.equal(before.content.series.length,7);assert.equal((await owner('boot')).data.canManage,true);
+  const mailSettings=await owner('mail-settings');assert.equal(mailSettings.status,200);assert.equal(mailSettings.data.enabled,false);assert.equal((await owner('mail-test',{})).status,502);
   assert.equal((await request('content',{content:before.content,revision})).status,403);
   const guest=await request('auth',{nickname:'页面访客验收'+Date.now().toString().slice(-6)});guestIds.push(guest.data.user.id);
   assert.equal((await request('content',{content:before.content,revision},guest.cookie)).status,403);

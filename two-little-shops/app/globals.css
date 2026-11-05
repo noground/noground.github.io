@@ -358,6 +358,7 @@
 .admin-view-site:hover{background:#edf2e5}
 @media(max-width:640px){.admin-mode .header-inner{padding-bottom:13px}.admin-mode .header-user{gap:5px}.admin-mode .header-user .nickname{display:none}.admin-mode .admin-header-title{grid-column:1/-1;justify-content:center;font-size:10px;padding:7px 0 4px;border-top:1px solid #e8edde}.admin-view-site{font-size:9px;padding:7px 9px;margin-right:3px}.admin-mode .brand strong{max-width:160px}.admin-mode .brand small{font-size:8px}}
 .admin-mode .workspace{display:block;max-width:1160px}
+.email-settings{padding:30px;border:1px solid var(--line);border-radius:18px;background:var(--paper);line-height:1.8}.email-settings h2{font-size:23px;margin:12px 0}.email-settings>p:not(.eyebrow){color:var(--muted);margin-top:8px}.email-settings-state{display:flex;align-items:center;gap:8px;padding:14px 16px;margin:20px 0 12px;background:var(--mint);border-radius:12px;color:var(--green)}.email-settings-actions{display:flex;align-items:center;gap:18px;margin-top:24px}.email-settings-note{font-size:12px}.email-settings .field-error{color:#ad5744!important}@media(max-width:640px){.email-settings{padding:22px 18px}.email-settings h2{font-size:20px}.email-settings-actions{gap:12px;flex-wrap:wrap}}
 
 /* Two familiar voices, beside the sofa. */
 .cinema-door-scene{position:relative}
