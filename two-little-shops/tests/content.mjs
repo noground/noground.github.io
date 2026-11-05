@@ -25,9 +25,10 @@ if(process.argv.includes('--preview')){
   const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jGZkAAAAASUVORK5CYII=';
   const upload=await owner('content-photo',{key:'test-content',image:png});assert.equal(upload.status,200);uploaded.push(upload.data.url.split('/').pop());
   assert.equal((await fetch(base+upload.data.url)).headers.get('content-type'),'image/png');
-  const edit=structuredClone(before.content);edit.home.title='页面管理持久化验收';edit.rooms.feifei.image=upload.data.url;edit.rooms.feifei.coverImage='';edit.series.push({...edit.series[0],id:'content-test-series',name:'自定义剧集',image:upload.data.url,showPin:false});
+  const edit=structuredClone(before.content);delete edit.copyVersion;edit.rooms.feifei.tagline='三杯美式，三种好心情';edit.rooms.tuntun.tagline='自己的厨房介绍';edit.cinema.sofaText='小猫靠着卡皮巴拉，今晚哪儿也不去。';edit.home.title='页面管理持久化验收';edit.rooms.feifei.image=upload.data.url;edit.rooms.feifei.coverImage='';edit.series.push({...edit.series[0],id:'content-test-series',name:'自定义剧集',image:upload.data.url,showPin:false});
   const save=await owner('content',{content:edit,revision});assert.equal(save.status,200);changed=true;revision=save.data.revision;
   const fresh=(await request('boot')).data;assert.equal(fresh.content.home.title,edit.home.title);assert.equal(fresh.shops[0].image,upload.data.url);assert.equal(fresh.content.series.length,8);assert.equal(fresh.dishes.length,9,'Content/photos must not turn into dishes.');
+  assert.equal(fresh.content.copyVersion,1);assert.equal(fresh.content.rooms.feifei.tagline,'popo特制，开启好心情');assert.equal(fresh.content.rooms.tuntun.tagline,'自己的厨房介绍');assert.equal(fresh.content.cinema.sofaText,'popo靠着屯屯，今晚哪儿也不去。');
   assert.equal((await owner('content',{content:before.content,revision:before.contentRevision})).status,409);
   const bad=structuredClone(edit);bad.rooms.cinema.image='javascript:alert(1)';assert.equal((await owner('content',{content:bad,revision})).status,400);
   const duplicate=structuredClone(edit);duplicate.series.push(duplicate.series[0]);assert.equal((await owner('content',{content:duplicate,revision})).status,400);

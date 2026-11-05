@@ -22,6 +22,7 @@ export type RoomKey='feifei'|'tuntun'|'cinema';
 export type RoomContent={name:string;english:string;kicker:string;tagline:string;description:string;image:string;coverImage:string;openText:string;signature:string;alt:string};
 export type SeriesContent={id:string;name:string;english:string;motif:string;line:string;color:string;title:string;note:string;objects:string[];place:string;pin:[number,number];showPin:boolean;image:string;crop:[number,number]};
 export type SiteContent={
+ copyVersion?:number;
  brand:{name:string;tagline:string;cinemaTagline:string;footer:string};
  home:{eyebrow:string;title:string;intro:string;sectionTitle:string;sectionSubtitle:string;featureTitle:string;noteTitle:string;noteBody:string};
  rooms:Record<RoomKey,RoomContent>;
@@ -31,14 +32,15 @@ export type SiteContent={
  series:SeriesContent[];
 };
 export const defaultContent:SiteContent={
+ copyVersion:1,
  brand:{name:'菲菲和屯屯',tagline:'两人一起，好好吃饭',cinemaTagline:'两人一起，慢慢看剧',footer:'认真吃饭，慢慢生活'},
  home:{eyebrow:'OUR LITTLE EVERYDAY',title:'今天，想怎么过？',intro:'喝点喜欢的，吃点热乎的，再窝着看一集。\n我们的家，今天也刚刚好。',sectionTitle:'回家啦，想先去哪儿？',sectionSubtitle:'三处小天地，都是我们的日常',featureTitle:'今天的心动推荐',noteTitle:'喜欢什么口味，记得告诉我们',noteBody:'少糖、少辣、不要葱花…每一份都可以有你的偏爱。'},
  rooms:{
-  feifei:{name:'菲菲饮品店',english:'FEIFEI DRINKS',kicker:'A COFFEE AT HOME',tagline:'三杯美式，三种好心情',description:'把日子泡慢一点，\n把喜欢的那一杯留给你。',image:defaultRoomImages.feifei,coverImage:'',openText:'窗边的位置，为你留着',signature:'☕ 一间小店，也是一角家',alt:'戴绿色小花领巾的小猫坐在木质咖啡吧台旁，阳光照着咖啡机和三杯饮品'},
-  tuntun:{name:'屯屯小厨房',english:'TUNTUN KITCHEN',kicker:'FROM OUR LITTLE KITCHEN',tagline:'热乎的饭，踏实的幸福',description:'烟火气不必很远，\n热饭和你，都在身边。',image:defaultRoomImages.tuntun,coverImage:'',openText:'灶火开着，等你回家',signature:'♨ 两人一桌，三餐四季',alt:'戴陶红色小花领巾的卡皮巴拉在温馨厨房里，守着一盘热乎的番茄炒蛋'},
+  feifei:{name:'菲菲饮品店',english:'FEIFEI DRINKS',kicker:'A COFFEE AT HOME',tagline:'popo特制，开启好心情',description:'把日子泡慢一点，\n把喜欢的那一杯留给你。',image:defaultRoomImages.feifei,coverImage:'',openText:'窗边的位置，为你留着',signature:'☕ 一间小店，也是一角家',alt:'戴绿色小花领巾的小猫坐在木质咖啡吧台旁，阳光照着咖啡机和三杯饮品'},
+  tuntun:{name:'屯屯小厨房',english:'TUNTUN KITCHEN',kicker:'FROM OUR LITTLE KITCHEN',tagline:'小厨房出品，我吃吃吃',description:'烟火气不必很远，\n热饭和你，都在身边。',image:defaultRoomImages.tuntun,coverImage:'',openText:'灶火开着，等你回家',signature:'♨ 两人一桌，三餐四季',alt:'戴陶红色小花领巾的卡皮巴拉在温馨厨房里，守着一盘热乎的番茄炒蛋'},
   cinema:{name:'家庭观影角',english:'OUR SOFA, OUR STORIES',kicker:"FEIFEI & TUNTUN'S WATCH ROOM",tagline:'我们的美剧角',description:'故事很远，\n你在身边。',image:defaultRoomImages.cinema,coverImage:'',openText:'壁炉亮着，两只已经靠在一起',signature:'一直为我们保留',alt:'小猫与卡皮巴拉靠在沙发上盖着毯子，壁炉、彩灯和七部剧的收藏小物环绕着它们'},
  },
- cinema:{heading:'故事很远，\n你在身边。',subtitle:'我们的美剧角',doorText:'灯暗一点，靠近一点。\n把喜欢的故事，再看一遍。',doorButton:'去沙发上坐坐',stageLabel:'OUR LITTLE CINEMA',collectionTitle:'一起看过的那些世界',collectionIntro:'点一部，看看我们为它留的收藏角',sofaText:'小猫靠着卡皮巴拉，今晚哪儿也不去。'},
+ cinema:{heading:'故事很远，\n你在身边。',subtitle:'我们的美剧角',doorText:'灯暗一点，靠近一点。\n把喜欢的故事，再看一遍。',doorButton:'去沙发上坐坐',stageLabel:'OUR LITTLE CINEMA',collectionTitle:'一起看过的那些世界',collectionIntro:'点一部，看看我们为它留的收藏角',sofaText:'popo靠着屯屯，今晚哪儿也不去。'},
  decor:{backgroundImage:'/images/home-doodles-v6.svg',opacity:.55},
  delivery:{image:'/images/cozy-delivery-v6.webp',heading:'订单收好啦，开饭小剧场开始',previewHeading:'小猫和卡皮巴拉的送餐小剧场',lines:['小猫端起热饮，卡皮巴拉带上餐盘','一杯喜欢的，一份热乎的，都带上','穿过暖暖的小走廊，往观影角走','到观影角啦，靠在一起等开饭']},
  series:defaultSeries.map(s=>({...s,...keepsakes[s.id],showPin:true,image:'',crop:({poi:[34,0],stranger:[52,0],sense8:[65,0],thisisus:[76,0],girls:[74,20],snow:[100,0],money:[100,23]} as Record<string,[number,number]>)[s.id]})),
@@ -54,6 +56,12 @@ export function normalizeContent(input:any):SiteContent{
  if(out.brand.name.length>30||out.home.title.length>60)throw new Error('名称最多 30 字，首页标题最多 60 字');
  if(!out.brand.name||!out.home.title)throw new Error('网站名称和首页标题不能为空');
  for(const key of ['feifei','tuntun','cinema'] as RoomKey[]){const r=input.rooms?.[key];out.rooms[key]=fields(r,out.rooms[key]);out.rooms[key].image=image(r?.image,defaultContent.rooms[key].image);out.rooms[key].coverImage=image(r?.coverImage,'',true);if(out.rooms[key].name.length>30)throw new Error('空间名称最多 30 字');if(!out.rooms[key].name)throw new Error('空间名称不能为空');}
+ // Upgrade the previous default copy without changing saved pictures or custom wording.
+ if(input.copyVersion!==1){
+  if(out.rooms.feifei.tagline==='三杯美式，三种好心情')out.rooms.feifei.tagline=defaultContent.rooms.feifei.tagline;
+  if(out.rooms.tuntun.tagline==='热乎的饭，踏实的幸福')out.rooms.tuntun.tagline=defaultContent.rooms.tuntun.tagline;
+  if(out.cinema.sofaText==='小猫靠着卡皮巴拉，今晚哪儿也不去。')out.cinema.sofaText=defaultContent.cinema.sofaText;
+ }
  out.decor.backgroundImage=image(input.decor?.backgroundImage,out.decor.backgroundImage,true);const opacity=input.decor?.opacity??out.decor.opacity;if(!Number.isFinite(opacity)||opacity<0||opacity>1)throw new Error('背景浓度需在 0–100% 之间');out.decor.opacity=opacity;
  out.delivery.image=image(input.delivery?.image,out.delivery.image);out.delivery.heading=text(input.delivery?.heading,out.delivery.heading);out.delivery.previewHeading=text(input.delivery?.previewHeading,out.delivery.previewHeading);
  if(input.delivery?.lines!==undefined){if(!Array.isArray(input.delivery.lines)||input.delivery.lines.length!==4)throw new Error('动画需填写四句旁白');out.delivery.lines=input.delivery.lines.map((v:any)=>text(v,'',100));}
