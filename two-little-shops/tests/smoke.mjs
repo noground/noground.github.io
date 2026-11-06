@@ -35,7 +35,7 @@ assert.equal((await guest('orders',{items:[{...items[0],id:'latte'}],requestId:c
 const requestId=crypto.randomUUID();const created=await guest('orders',{items,note:'验收订单：多份、混合小店',requestId});assert.equal(created.status,200);
 const duplicate=await guest('orders',{items,requestId});assert.equal(duplicate.data.id,created.data.id);
 const records=await guest('orders');assert.equal(records.data.length,1);const order=records.data[0];assert.equal(order.total,8400);assert.equal(order.items[0].quantity,2);assert.equal(order.nickname,'验收食客'+suffix);assert.equal(order.note,'验收订单：多份、混合小店');
-assert.equal(order.email_status,'not_configured');
+assert.equal(order.email_status,'not_configured');assert.equal(order.feifei_email_status,'not_configured');
 assert.equal((await guest('mail-settings')).status,403);assert.equal((await guest('mail-test',{})).status,403);
 assert.equal((await guest('orders?all=1')).status,403);
 assert.equal((await guest('menu',{dish:latte})).status,403);assert.equal((await pickedOwner('menu',{dish:latte})).status,403);
@@ -57,5 +57,7 @@ assert.equal((await owner('menu',{type:'shop',id:'feifei',image:photo})).status,
 const withCover=(await anon('boot')).data.shops[0];assert.equal(withCover.image,boot.data.contentRevision>0?boot.data.shops[0].image:'/api/photo/shop-feifei');assert.equal((await fetch(base+'/api/photo/shop-feifei')).headers.get('content-type'),'image/png');assert.equal((await owner('menu',{type:'shop',id:'feifei',image:'/api/photo/shop-feifei'})).status,200);
 assert.equal((await owner('menu',{type:'shop',id:'feifei',image:boot.data.shops[0].image})).status,200);
 const outsider=client();const foreign=await outsider('auth',{nickname:'验收旁观'+suffix});assert.equal(foreign.status,200);assert.equal((await outsider('order',{id:order.id,status:'completed'},'PATCH')).status,403);assert.equal((await outsider('orders')).data.length,0);
+const drinkOnly=await guest('orders',{items:[items[0]],requestId:crypto.randomUUID()});assert.equal(drinkOnly.status,200);const drinkRecord=(await guest('orders')).data.find(o=>o.id===drinkOnly.data.id);assert.equal(drinkRecord.email_status,'not_required');assert.equal(drinkRecord.feifei_email_status,'not_configured');
+const foodOnly=await guest('orders',{items:[items[1]],requestId:crypto.randomUUID()});assert.equal(foodOnly.status,200);const foodRecord=(await guest('orders')).data.find(o=>o.id===foodOnly.data.id);assert.equal(foodRecord.email_status,'not_configured');assert.equal(foodRecord.feifei_email_status,'not_required');
 console.log('PASS: nickname-only profiles, switching/history, concurrent same names, management boundary, legacy sessions, orders, reviews and menu editing.');
 console.log('Local test only; no production records created.');

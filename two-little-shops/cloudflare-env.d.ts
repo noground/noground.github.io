@@ -8,5 +8,6 @@ declare namespace Cloudflare {
     EMAILJS_PRIVATE_KEY?: string;
     ORDER_MAIL_FROM?: string;
     ORDER_MAIL_TUNTUN_TO?: string;
+		ORDER_MAIL_FEIFEI_TO?: string;
   }
 }

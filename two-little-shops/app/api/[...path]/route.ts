@@ -1,7 +1,7 @@
 import {defaultContent,normalizeContent,type SiteContent} from '../../content';
 import { env,waitUntil } from 'cloudflare:workers';
 import {githubBridge} from '../../github-bridge';
-import {deliverKitchenEmail,hasKitchenItems,mailConfigured,testKitchenEmail} from '../../order-mail';
+import {deliverOrderEmails,orderMailStatus,mailConfigured,testShopEmail} from '../../order-mail';
 import { dishes as defaults, shops as defaultShops, buildCartLine, retiredDishIds, type Dish, type Shop, type User } from '../../data';
 export const dynamic='force-dynamic';
 const json=(data:unknown,status=200,headers:Record<string,string>={})=>Response.json(data,{status,headers:{'Cache-Control':'no-store',...headers}});
@@ -29,13 +29,13 @@ async function handle(req:Request){if(new URL(req.url).pathname==='/api/github')
  const path=new URL(req.url).pathname.replace('/api/','');
  if(req.method!=='GET'){const origin=req.headers.get('origin');if(origin&&origin!==new URL(req.url).origin)fail('请从小店页面内操作',403);if(Number(req.headers.get('content-length')||0)>300000)fail('图片太大，请选择更小的图片',413);}
  const user=await userFor(req),canManage=await siteOwner(req)||user?.role==='owner';
- if(req.method==='GET'&&path==='mail-settings'){if(!canManage)fail('只有店主可以查看邮件设置',403);return json({enabled:mailConfigured(env),from:env.ORDER_MAIL_FROM||'',to:env.ORDER_MAIL_TUNTUN_TO||''});}
+ if(req.method==='GET'&&path==='mail-settings'){if(!canManage)fail('只有店主可以查看邮件设置',403);return json({enabled:mailConfigured(env)||mailConfigured(env,'feifei'),from:env.ORDER_MAIL_FROM||'',to:env.ORDER_MAIL_TUNTUN_TO||'',kitchenEnabled:mailConfigured(env),feifeiTo:env.ORDER_MAIL_FEIFEI_TO||'',feifeiEnabled:mailConfigured(env,'feifei')});}
  if(req.method==='GET'&&path.startsWith('photo/')){const id=path.slice(6);const row=await env.DB.prepare('SELECT data FROM overrides WHERE id=?').bind(id).first<{data:string}>();if(!row)return new Response(null,{status:404});const pic=JSON.parse(row.data).image as string;if(!pic?.startsWith('data:image/'))return new Response(null,{status:404});const [header,encoded]=pic.split(',');return new Response(Uint8Array.from(atob(encoded),c=>c.charCodeAt(0)),{headers:{'Content-Type':header.slice(5).split(';')[0],'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'}});}
  if(req.method==='GET'&&path==='profiles'){const rows=await env.DB.prepare('SELECT id,nickname FROM users ORDER BY nickname COLLATE NOCASE LIMIT 200').all<{id:string;nickname:string}>();return json(rows.results);}
  if(req.method==='GET'&&path==='boot'){const m=await menu(),state=await contentState();return json({...m,shops:m.shops.map(s=>({...s,name:state.content.rooms[s.id as 'feifei'|'tuntun'].name,english:state.content.rooms[s.id as 'feifei'|'tuntun'].english,tagline:state.content.rooms[s.id as 'feifei'|'tuntun'].tagline,image:state.content.rooms[s.id as 'feifei'|'tuntun'].coverImage||state.content.rooms[s.id as 'feifei'|'tuntun'].image})),user,canManage,content:state.content,contentRevision:state.revision});}
  if(req.method==='GET'&&path==='orders'){const all=new URL(req.url).searchParams.get('all')==='1';if(all&&!canManage)fail('只有店主可以查看全部订单',403);if(!all&&!user)fail('先选个昵称吧',401);const rows=await env.DB.prepare(`SELECT * FROM orders ${all?'':'WHERE user_id=?'} ORDER BY created_at DESC LIMIT 200`).bind(...(all?[]:[user!.id])).all<{items:string}>();return json(rows.results.map(r=>({...r,items:JSON.parse(r.items)})));}
  let body:any={};if(req.method!=='GET'){const raw=await req.text();if(raw.length>300000)fail('内容太大',413);try{body=raw?JSON.parse(raw):{};}catch{fail('提交内容有误');}if(!body||typeof body!=='object'||Array.isArray(body))fail('提交内容有误');}
- if(req.method==='POST'&&path==='mail-test'){if(!canManage)fail('只有店主可以测试邮件',403);const result=await testKitchenEmail(env);if(result.status!=='sent')fail(result.error==='configuration_missing'?'邮件服务还未连接':result.status==='unknown'?'发送结果未能确认，请先查看收件箱，再决定是否重试':'邮件未能发出，请检查发信服务配置',502);return json({ok:true});}
+ if(req.method==='POST'&&path==='mail-test'){if(!canManage)fail('只有店主可以测试邮件',403);const shop=body.shop??'tuntun';if(shop!=='tuntun'&&shop!=='feifei')fail('请选择有效的小店');const result=await testShopEmail(env,shop);if(result.status!=='sent')fail(result.error==='configuration_missing'?'邮件服务还未连接':result.status==='unknown'?'发送结果未能确认，请先查看收件箱，再决定是否重试':'邮件未能发出，请检查发信服务配置',502);return json({ok:true});}
  if(req.method==='POST'&&path==='auth'){
   const nickname=typeof body.nickname==='string'?body.nickname.normalize('NFKC').trim():'';
   if(!nickname||nickname.length>20||/[\u0000-\u001f\u007f]/.test(nickname))fail('昵称请填写 1–20 个字');
@@ -74,9 +74,9 @@ async function handle(req:Request){if(new URL(req.url).pathname==='/api/github')
   const existing=await env.DB.prepare('SELECT id,user_id FROM orders WHERE request_id=?').bind(requestId).first<any>();if(existing){if(existing.user_id!==user!.id)fail('订单请求无效',403);return json({id:existing.id});}
   const m=await menu();const items=body.items.map((line:any)=>{const dish=m.dishes.find(d=>d.id===line.id);if(!dish)fail('菜单已经更新，请重新选餐');return buildCartLine(dish!,line.quantity,line.options||{});});
   const total=items.reduce((n:number,i:any)=>n+Math.round(i.price*100)*i.quantity,0);const id=crypto.randomUUID();const note=str(body.note,200);
-  const kitchen=hasKitchenItems(items),emailStatus=kitchen?(mailConfigured(env)?'pending':'not_configured'):'not_required';
-  try{await env.DB.prepare("INSERT INTO orders(id,user_id,nickname,items,total,note,status,created_at,request_id,email_status) VALUES(?,?,?,?,?,?,'pending',?,?,?)").bind(id,user!.id,user!.nickname,JSON.stringify(items),total,note,new Date().toISOString(),requestId,emailStatus).run();}catch(e){const duplicate=await env.DB.prepare('SELECT id FROM orders WHERE request_id=? AND user_id=?').bind(requestId,user!.id).first<any>();if(duplicate)return json({id:duplicate.id});throw e;}
-  if(emailStatus==='pending')waitUntil(deliverKitchenEmail(env.DB,env,id).catch(()=>{console.error('Order email notification failed');}));
+  const emailStatus=orderMailStatus(items,env,'tuntun'),feifeiEmailStatus=orderMailStatus(items,env,'feifei');
+  try{await env.DB.prepare("INSERT INTO orders(id,user_id,nickname,items,total,note,status,created_at,request_id,email_status,feifei_email_status) VALUES(?,?,?,?,?,?,'pending',?,?,?,?)").bind(id,user!.id,user!.nickname,JSON.stringify(items),total,note,new Date().toISOString(),requestId,emailStatus,feifeiEmailStatus).run();}catch(e){const duplicate=await env.DB.prepare('SELECT id FROM orders WHERE request_id=? AND user_id=?').bind(requestId,user!.id).first<any>();if(duplicate)return json({id:duplicate.id});throw e;}
+  if(emailStatus==='pending'||feifeiEmailStatus==='pending')waitUntil(deliverOrderEmails(env.DB,env,id).catch(()=>{console.error('Order email notification failed');}));
   return json({id});
  }
  if(req.method==='PATCH'&&path==='order'){

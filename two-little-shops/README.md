@@ -108,3 +108,7 @@ Smoke check 仅允许 localhost，会创建本地验收昵称、订单和一个�
 163 邮箱通过 EmailJS HTTPS 服务连接；需要邮箱所有者确认使用中转服务并自行在其安全连接页填写 SMTP 授权码。授权码及 API 私钥不放进源码或聊天。接入步骤和模板见 `docs/order-email-setup.md`；当前源码包含功能，是否启用以管理页连接状态为准。
 
 本地验证：`node --experimental-strip-types tests/order-mail.mjs`。测试使用本地内存数据库和模拟发信，不发送真实邮件。
+
+## 两店分别通知
+
+第 12 版按店铺分开收件：饮品店使用 `ORDER_MAIL_FEIFEI_TO`，小厨房继续使用 `ORDER_MAIL_TUNTUN_TO`。混合订单发送两封本店餐品邮件，小计分别计算、发送状态各自记录。两家共用一套发信服务及动态收件模板；邮件地址与密钥仍只放受保护的运行配置。独立管理页可以分别测试两家。

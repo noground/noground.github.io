@@ -15,6 +15,13 @@
       "when": 1793894959138,
       "tag": "0001_light_sasquatch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793945080667,
+      "tag": "0002_rich_photon",
+      "breakpoints": true
     }
   ]
 }
