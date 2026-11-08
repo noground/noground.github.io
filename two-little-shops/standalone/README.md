@@ -25,3 +25,11 @@ node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js de
 普通食客选择昵称。管理操作需要店主口令。原站通过自己的身份系统管理，独立后台使用签名 Cookie。
 
 原站数据通过其店主专用 `/api/migration-export` 导出，迁入独立 D1 后保留原用户编号、订单编号和图片。更换后台后需要重新选择昵称。每个部署拥有自己的数据库，后续修改分别保存。
+
+## GitHub 访客接口
+
+当前 GitHub 点餐页通过 `https://two-little-shops-relay.onrender.com` 访问访客接口和上传图片，Render 将请求转发到同一个 Cloudflare 数据库后台。管理入口仍使用独立的 Cloudflare 地址。免费 Render 服务唤醒可能需要约一分钟，客户端为此保留最多 90 秒的请求等待时间。
+
+```sh
+ORDER_API_ORIGIN=https://two-little-shops-relay.onrender.com ORDER_MANAGE_ORIGIN=https://two-little-shops.wudi09711-shops.workers.dev node scripts/build-github-pages.mjs
+```
