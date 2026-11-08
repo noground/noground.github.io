@@ -29,6 +29,15 @@ async function handle(req:Request){if(new URL(req.url).pathname==='/api/github')
  const path=new URL(req.url).pathname.replace('/api/','');
  if(req.method!=='GET'){const origin=req.headers.get('origin');if(origin&&origin!==new URL(req.url).origin)fail('请从小店页面内操作',403);if(Number(req.headers.get('content-length')||0)>300000)fail('图片太大，请选择更小的图片',413);}
  const user=await userFor(req),canManage=await siteOwner(req)||user?.role==='owner';
+ if(req.method==='GET'&&path==='migration-export'){
+  if(!canManage)fail('只有店主可以导出迁移数据',403);
+  const [profiles,orderRows,edits]=await env.DB.batch([
+   env.DB.prepare('SELECT id,nickname FROM users ORDER BY id'),
+   env.DB.prepare('SELECT * FROM orders ORDER BY id'),
+   env.DB.prepare('SELECT id,data FROM overrides ORDER BY id'),
+  ]);
+  return json({format:'two-little-shops-migration-v1',exportedAt:new Date().toISOString(),users:profiles.results,orders:orderRows.results,overrides:edits.results},200,{'Content-Disposition':'attachment; filename="two-little-shops-data.json"'});
+ }
  if(req.method==='GET'&&path==='mail-settings'){if(!canManage)fail('只有店主可以查看邮件设置',403);return json({enabled:mailConfigured(env)||mailConfigured(env,'feifei'),from:env.ORDER_MAIL_FROM||'',to:env.ORDER_MAIL_TUNTUN_TO||'',kitchenEnabled:mailConfigured(env),feifeiTo:env.ORDER_MAIL_FEIFEI_TO||'',feifeiEnabled:mailConfigured(env,'feifei')});}
  if(req.method==='GET'&&path.startsWith('photo/')){const id=path.slice(6);const row=await env.DB.prepare('SELECT data FROM overrides WHERE id=?').bind(id).first<{data:string}>();if(!row)return new Response(null,{status:404});const pic=JSON.parse(row.data).image as string;if(!pic?.startsWith('data:image/'))return new Response(null,{status:404});const [header,encoded]=pic.split(',');return new Response(Uint8Array.from(atob(encoded),c=>c.charCodeAt(0)),{headers:{'Content-Type':header.slice(5).split(';')[0],'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'}});}
  if(req.method==='GET'&&path==='profiles'){const rows=await env.DB.prepare('SELECT id,nickname FROM users ORDER BY nickname COLLATE NOCASE LIMIT 200').all<{id:string;nickname:string}>();return json(rows.results);}

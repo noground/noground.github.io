@@ -18,13 +18,15 @@ if(process.argv.includes('--preview')){
  try{
   assert.equal(before.dishes.length,9);assert.equal(before.canManage,false);assert.equal(before.content.series.length,7);assert.equal((await owner('boot')).data.canManage,true);
   const mailSettings=await owner('mail-settings');assert.equal(mailSettings.status,200);assert.equal(mailSettings.data.enabled,false);assert.equal(mailSettings.data.feifeiEnabled,false);assert.equal(mailSettings.data.kitchenEnabled,false);assert.equal((await owner('mail-test',{})).status,502);assert.equal((await owner('mail-test',{shop:'invalid'})).status,400);
+  assert.equal((await request('migration-export')).status,403);
   assert.equal((await request('content',{content:before.content,revision})).status,403);
   const guest=await request('auth',{nickname:'页面访客验收'+Date.now().toString().slice(-6)});guestIds.push(guest.data.user.id);
   assert.equal((await request('content',{content:before.content,revision},guest.cookie)).status,403);
   const picked=await request('auth',{nickname});assert.equal((await request('boot',undefined,picked.cookie)).data.canManage,false);
-  assert.equal((await request('content-photo',{key:'fake',image:'data:image/png;base64,AAAA'},picked.cookie)).status,403);
+  assert.equal((await request('content-photo',{key:'fake',image:'data:image/png;base64,AAAA'},picked.cookie)).status,403);assert.equal((await request('migration-export',undefined,picked.cookie)).status,403);
   const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jGZkAAAAASUVORK5CYII=';
   const upload=await owner('content-photo',{key:'test-content',image:png});assert.equal(upload.status,200);uploaded.push(upload.data.url.split('/').pop());
+  const exported=await owner('migration-export');assert.equal(exported.status,200);assert.equal(exported.data.format,'two-little-shops-migration-v1');assert(exported.data.users.every(u=>Object.keys(u).sort().join(',')==='id,nickname'));assert(!('sessions' in exported.data));assert.equal(JSON.parse(exported.data.overrides.find(e=>e.id===uploaded[0]).data).image,png);
   assert.equal((await fetch(base+upload.data.url)).headers.get('content-type'),'image/png');
   const edit=structuredClone(before.content);delete edit.copyVersion;edit.rooms.feifei.tagline='三杯美式，三种好心情';edit.rooms.tuntun.tagline='自己的厨房介绍';edit.cinema.sofaText='小猫靠着卡皮巴拉，今晚哪儿也不去。';edit.home.title='页面管理持久化验收';edit.rooms.feifei.image=upload.data.url;edit.rooms.feifei.coverImage='';edit.series.push({...edit.series[0],id:'content-test-series',name:'自定义剧集',image:upload.data.url,showPin:false});
   const save=await owner('content',{content:edit,revision});assert.equal(save.status,200);changed=true;revision=save.data.revision;
