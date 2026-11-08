@@ -2,6 +2,6 @@
 
 https://noground.github.io/?look=cute
 
-菜单、昵称、订单、评价及上传图片连接部署时指定的独立后台。请选同一个昵称查看自己的记录。管理页位于对应后台的 /manage。使用 app/shop-api.ts 连接受限访客接口，不依赖跨站 Cookie，不提供管理权限。网络无法连接原后台时会明确提示，不会把本地试选误作已保存订单。
+菜单、昵称、订单、评价及上传图片连接部署时指定的独立后台。请选同一个昵称查看自己的记录。店主管理入口独立，请使用保存的管理网址。使用 app/shop-api.ts 连接受限访客接口，不依赖跨站 Cookie，不提供管理权限。网络无法连接原后台时会明确提示，不会把本地试选误作已保存订单。
 
 构建：在源码目录安装依赖后运行 node scripts/build-github-pages.mjs，发布 work/github-pages-live/dist 到 gh-pages 分支。
