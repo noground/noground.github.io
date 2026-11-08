@@ -8,7 +8,7 @@ import {PhotoField} from './photo-field';
 import {DeliveryJourney} from './delivery';
 import {CinemaCorner,CinemaDoor,RoomScene} from './rooms';
 import { shops as initialShops,dishes as initialDishes,statusLabels,buildCartLine,type Shop,type Dish,type CartItem,type User,type Order } from './data';
-import {api,isGithubSite} from './shop-api';
+import {api,isGithubSite,menuSnapshot} from './shop-api';
 import {OwnerLogin} from './owner-login';
 import {EmailSettings} from './email-settings';
 const money=(n:number)=>`¥${Number(n.toFixed(2))}`;
@@ -50,7 +50,15 @@ export default function OrderingApp({adminMode=false}:{adminMode?:boolean}){
  const submitId=useRef<string|null>(null),toastTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
  const shop=shops.find(s=>s.id===shopId)!;const total=cart.reduce((n,l)=>n+Math.round(l.price*100)*l.quantity,0)/100,count=cart.reduce((n,l)=>n+l.quantity,0);
  const notify=(s:string)=>{setToast(s);if(toastTimer.current)clearTimeout(toastTimer.current);toastTimer.current=setTimeout(()=>setToast(''),3500);};
- async function boot(){try{const d=await api('boot');setShops(d.shops);setDishes(d.dishes);setCart(prev=>prev.filter(l=>d.dishes.some((dish:Dish)=>dish.id===l.id)));setUser(d.user);setCanManage(d.canManage===true);setOwnerAuth(d.ownerAuth||'chatgpt');setContent(d.content||defaultContent);setContentRevision(d.contentRevision||0);setError('');setReady(true);}catch(e:any){setError(e.message);setReady(false);}}
+ function applyMenu(d:any){setShops(d.shops);setDishes(d.dishes);setCart(prev=>prev.filter(l=>d.dishes.some((dish:Dish)=>dish.id===l.id)));setContent(d.content||defaultContent);setContentRevision(d.contentRevision||0);}
+ async function boot(){
+  let snapshotTime='';
+  if(isGithubSite()){
+   try{const snapshot=await menuSnapshot();applyMenu(snapshot);snapshotTime=new Date(snapshot.publishedAt).toLocaleString('zh-CN');setReady(false);setError('正在显示菜单副本，连接实时点餐服务中…');}catch{}
+  }
+  try{const d=await api('boot');applyMenu(d);setUser(d.user);setCanManage(d.canManage===true);setOwnerAuth(d.ownerAuth||'chatgpt');setError('');setReady(true);}
+  catch(e:any){setError(snapshotTime?'当前显示菜单副本（同步于 '+snapshotTime+'）。实时点餐尚未连接，可先浏览和挑选，连接恢复后再提交。':e.message);setReady(false);}
+ }
  useEffect(()=>{boot();try{const saved=JSON.parse(localStorage.getItem('ft-cart')||'[]');if(Array.isArray(saved))setCart(saved.filter(l=>l&&typeof l.id==='string'&&typeof l.key==='string'&&Number.isInteger(l.quantity)&&l.quantity>0&&l.quantity<=99&&Number.isFinite(l.price)&&l.price>=0&&l.options&&typeof l.options==='object').slice(0,50));setNote(localStorage.getItem('ft-note')||'');}catch{}setStorageReady(true);return()=>{if(toastTimer.current)clearTimeout(toastTimer.current);};},[]);
  useEffect(()=>{if(storageReady){try{localStorage.setItem('ft-cart',JSON.stringify(cart));localStorage.setItem('ft-note',note);}catch{}}},[cart,note,storageReady]);
  useEffect(()=>{submitId.current=null;},[cart,note,user?.id]);
