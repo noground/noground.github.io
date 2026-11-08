@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: two-little-shops-relay
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: two-little-shops/standalone/relay
+    buildCommand: node --check server.mjs
+    startCommand: node server.mjs
+    healthCheckPath: /health
