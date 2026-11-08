@@ -3,6 +3,7 @@ import {pathToFileURL} from 'node:url';
 
 const visitorOrigin='https://noground.github.io';
 const upstream='https://two-little-shops.wudi09711-shops.workers.dev/api/github';
+const photoOrigin=new URL(upstream).origin;
 const maxBodyBytes=300000;
 
 export function createRelay(send=fetch){
@@ -18,6 +19,17 @@ export function createRelay(send=fetch){
    response.end(JSON.stringify(data));
   };
   if(request.url==='/health'&&request.method==='GET')return reply(200,{service:'two-little-shops-relay'});
+  if(request.method==='GET'&&/^\/api\/photo\/[a-z0-9-]+$/.test(request.url||'')){
+   try{
+    const picture=await send(photoOrigin+request.url,{method:'GET',signal:AbortSignal.timeout(20000),redirect:'error'});
+    if(picture.status===404)return reply(404,{error:'图片不存在'});
+    const type=picture.headers.get('content-type')?.split(';')[0];
+    if(!picture.ok||!['image/jpeg','image/png','image/webp'].includes(type))return reply(502,{error:'图片暂时无法读取'});
+    const bytes=await picture.arrayBuffer();
+    response.writeHead(200,{...headers,'Content-Type':type,'Cache-Control':'no-cache'});
+    return response.end(Buffer.from(bytes));
+   }catch{return reply(502,{error:'图片暂时无法读取'});}
+  }
   if(request.url!=='/api/github')return reply(404,{error:'没有找到这个操作'});
   if(request.headers.origin!==visitorOrigin)return reply(403,{error:'请从点餐页操作'});
   headers['Access-Control-Allow-Origin']=visitorOrigin;

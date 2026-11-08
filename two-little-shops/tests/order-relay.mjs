@@ -3,6 +3,7 @@ import {once} from 'node:events';
 import {createRelay} from '../standalone/relay/server.mjs';
 let calls=0,fail=false;
 const server=createRelay(async(url,options)=>{
+ if(options.method==='GET'){assert.equal(url,'https://two-little-shops.wudi09711-shops.workers.dev/api/photo/test-photo');assert.equal(options.headers,undefined);return new Response('photo-fixture',{headers:{'Content-Type':'image/jpeg','Set-Cookie':'forbidden-cookie'}});}
  calls++;assert.equal(url,'https://two-little-shops.wudi09711-shops.workers.dev/api/github');assert.deepEqual(Object.keys(options.headers).sort(),['Content-Type','Origin']);assert.equal(options.headers.Origin,'https://noground.github.io');assert.equal(options.redirect,'error');
  const message=JSON.parse(options.body.toString());assert.equal(message.path,'orders');assert.equal(message.body.requestId,'local-test');
  if(fail)throw Error('Connection failure');
@@ -12,6 +13,8 @@ server.listen(0,'127.0.0.1');await once(server,'listening');const base='http://1
 const headers={Origin:'https://noground.github.io','Content-Type':'text/plain',Cookie:'private-cookie','oai-authenticated-user-email':'private@example.com'};
 try{
  assert.equal((await fetch(base+'/health')).status,200);
+ const photo=await fetch(base+'/api/photo/test-photo',{headers:{Cookie:'private-cookie'}});assert.equal(photo.status,200);assert.equal(photo.headers.get('content-type'),'image/jpeg');assert.equal(photo.headers.get('set-cookie'),null);assert.equal(await photo.text(),'photo-fixture');
+ assert.equal((await fetch(base+'/api/photo/not-allowed?secret=1')).status,404);
  assert.equal((await fetch(base+'/api/owner-auth',{method:'POST',headers})).status,404);
  assert.equal((await fetch(base+'/api/github',{method:'POST',headers:{Origin:'https://wrong.example'}})).status,403);assert.equal(calls,0);
  const body=JSON.stringify({path:'orders',method:'POST',body:{requestId:'local-test'}});

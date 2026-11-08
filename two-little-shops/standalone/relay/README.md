@@ -1,6 +1,6 @@
 # 免费点餐访问入口
 
-只中转 GitHub 点餐页的 `/api/github` 访客接口。订单和昵称写入现有 Cloudflare D1，邮件由现有后台处理。
+中转 GitHub 点餐页的 `/api/github` 访客接口，并提供公开的 `/api/photo/<id>` 图片读取。订单和昵称写入现有 Cloudflare D1，邮件由现有后台处理。
 
 在 Render 创建 Web Service，选择仓库 `noground/noground.github.io` 的 `main` 分支。
 
