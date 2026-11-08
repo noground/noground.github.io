@@ -1,4 +1,4 @@
-const service='https://feifei-tuntun-table.wudi0971.chatgpt.site';
+const service=process.env.NEXT_PUBLIC_ORDER_API_ORIGIN||'https://feifei-tuntun-table.wudi0971.chatgpt.site';
 const tokenKey='ft-github-nickname-session';
 let memoryToken:string|undefined;
 export const isGithubSite=()=>typeof window!=='undefined'&&window.location.hostname==='noground.github.io';

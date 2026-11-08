@@ -1,5 +1,10 @@
 declare namespace Cloudflare {
   interface Env {
+    STANDALONE?: string;
+    OWNER_PASSWORD_HASH?: string;
+    OWNER_SESSION_KEY?: string;
+    SHOP_MANAGE_URL?: string;
+    ASSETS?: Fetcher;
     DB?: D1Database;
     BUCKET?: R2Bucket;
     EMAILJS_SERVICE_ID?: string;

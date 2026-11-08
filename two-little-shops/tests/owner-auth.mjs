@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {pbkdf2Sync,createHmac} from 'node:crypto';
+import {ownerLogin,ownerSessionValid} from '../app/owner-auth.ts';
+const secret='local-test-session-key-only',password='local-test-owner-password',salt='0123456789abcdef0123456789abcdef';
+const environment={OWNER_SESSION_KEY:secret,OWNER_PASSWORD_HASH:salt+':'+pbkdf2Sync(password,Buffer.from(salt,'hex'),100000,32,'sha256').toString('hex'),DB:{prepare(){return{bind(){return this;},async first(){return {attempts:1};}};}}};
+const request=new Request('https://shop.example/api/owner-auth');
+assert.equal((await ownerLogin(request,'incorrect-password',environment)).status,401);
+const valid=await ownerLogin(request,password,environment);assert.equal(valid.status,200);const cookie=valid.headers.get('set-cookie');assert(cookie.includes('HttpOnly')&&cookie.includes('Secure')&&cookie.includes('SameSite=Strict'));
+assert.equal(await ownerSessionValid(new Request('https://shop.example/api/boot',{headers:{cookie}}),secret),true);
+assert.equal(await ownerSessionValid(new Request('https://shop.example/api/boot',{headers:{cookie:cookie.replace('owner_session=','owner_session=0')}}),secret),false);
+const expires=String(Date.now()-1000),signature=createHmac('sha256',secret).update(expires).digest('hex');assert.equal(await ownerSessionValid(new Request('https://shop.example/api/boot',{headers:{cookie:`owner_session=${expires}.${signature}`}}),secret),false);
+assert.equal(await ownerSessionValid(request),false);
+const limited={...environment,DB:{prepare(){return{bind(){return this;},async first(){return {attempts:11};}};}}};assert.equal((await ownerLogin(request,password,limited)).status,429);
+console.log('PASS: owner password verification, signed sessions, tampering, expiry, and login rate limit.');

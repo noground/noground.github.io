@@ -1,0 +1,34 @@
+{
+  "name": "two-little-shops",
+  "main": "worker.ts",
+  "account_id": "584a91acad2fd3be6bb5c819ef01fc1a",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "vars": {
+    "STANDALONE": "true",
+    "SHOP_MANAGE_URL": "https://two-little-shops.wudi09711-shops.workers.dev/manage?look=cute"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "two-little-shops",
+      "database_id": "a88e89f6-a8a9-40ff-ad3f-fd03bf6a10ee",
+      "migrations_dir": "../drizzle"
+    }
+  ],
+  "assets": {
+    "directory": "../work/github-pages-live/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*",
+      "/health"
+    ]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
