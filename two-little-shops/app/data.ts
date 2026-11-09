@@ -8,9 +8,9 @@ export const shops:Shop[]=[
  {id:'tuntun',name:'屯屯小厨房',english:'TUNTUN KITCHEN',tagline:'热乎的饭，踏实的幸福',description:'把喜欢的家常味道，认真做给你吃。',image:'/images/kitchen.jpg',categories:['炒菜','主食','汤羹']}
 ];
 export const dishes:Dish[]=[
- {id:'orange-americano',shop:'feifei',name:'橙C美式',category:'风味美式',description:'清亮橙香遇上醇厚浓缩，果汁的酸甜让咖啡多了一点轻快。配料为示例，可按实际配方调整。',ingredients:['浓缩咖啡','橙汁','鲜橙片','饮用水','冰块'],price:18,image:'/images/orange-americano.svg',tag:'橙意满满',options:{温度:['冰','常温'],甜度:['不额外加糖','微糖']},available:true},
- {id:'coconut-americano',shop:'feifei',name:'生椰美式',category:'风味美式',description:'用清爽椰子水托住咖啡香，淡淡椰甜，轻盈好入口。配料为示例，可按实际配方调整。',ingredients:['浓缩咖啡','椰子水','饮用水','冰块'],price:18,image:'/images/coconut-americano.svg',tag:'椰风轻轻',options:{温度:['冰','常温'],甜度:['不额外加糖','微糖']},available:true},
- {id:'cocoa-americano',shop:'feifei',name:'可可美式',category:'风味美式',description:'微苦可可与浓缩咖啡相遇，香气浓郁，留一口柔和的回味。配料为示例，可按实际配方调整。',ingredients:['浓缩咖啡','可可粉','饮用水'],price:18,image:'/images/cocoa-americano.svg',tag:'可可抱抱',options:{温度:['冰','热'],甜度:['不额外加糖','微糖']},available:true},
+ {id:'orange-americano',shop:'feifei',name:'橙C美式',category:'风味美式',description:'清亮橙香遇上醇厚浓缩，果汁的酸甜让咖啡多了一点轻快。',ingredients:['浓缩咖啡','橙汁','鲜橙片','饮用水','冰块'],price:18,image:'/images/orange-americano.svg',tag:'橙意满满',options:{温度:['冰','常温'],甜度:['不额外加糖','微糖']},available:true},
+ {id:'coconut-americano',shop:'feifei',name:'生椰美式',category:'风味美式',description:'用清爽椰子水托住咖啡香，淡淡椰甜，轻盈好入口。',ingredients:['浓缩咖啡','椰子水','饮用水','冰块'],price:18,image:'/images/coconut-americano.svg',tag:'椰风轻轻',options:{温度:['冰','常温'],甜度:['不额外加糖','微糖']},available:true},
+ {id:'cocoa-americano',shop:'feifei',name:'可可美式',category:'风味美式',description:'微苦可可与浓缩咖啡相遇，香气浓郁，留一口柔和的回味。',ingredients:['浓缩咖啡','可可粉','饮用水'],price:18,image:'/images/cocoa-americano.svg',tag:'可可抱抱',options:{温度:['冰','热'],甜度:['不额外加糖','微糖']},available:true},
  {id:'tomato-egg',shop:'tuntun',name:'番茄炒蛋',category:'炒菜',description:'酸甜的番茄裹着蓬松鸡蛋，汤汁拌饭，是熟悉又安心的家的味道。',ingredients:['番茄','鸡蛋','小葱','食用油','盐','糖'],price:16,image:'/images/kitchen.jpg',tag:'下饭担当',options:{口味:['家常口味','少盐'],葱花:['要葱花','不要葱花']},available:true},
  {id:'chicken',shop:'tuntun',name:'宫保鸡丁',category:'炒菜',description:'嫩鸡丁、脆花生和爽口配菜大火快炒，微辣带甜，越吃越开胃。',ingredients:['鸡腿肉','花生','黄瓜','胡萝卜','干辣椒','生抽'],price:26,image:'/images/chicken.jpg',tag:'人气家常菜',options:{辣度:['微辣','中辣','不辣']},available:true},
  {id:'greens',shop:'tuntun',name:'蒜蓉时蔬',category:'炒菜',description:'当季青菜与蒜香相伴，清清爽爽，让这一餐多一份鲜绿。',ingredients:['当季青菜','大蒜','食用油','盐'],price:12,image:'/images/greens.jpg',tag:'来点绿色',options:{口味:['正常','少油少盐']},available:true},
