@@ -1,6 +1,6 @@
 export const GITHUB_ORIGIN='https://noground.github.io';
 const nicknameToken=/^nickname\.[a-f0-9-]{72}$/;
-const visitorActions=new Set(['GET boot','GET profiles','GET orders','POST auth','POST logout','POST orders','PATCH order']);
+const visitorActions=new Set(['GET boot','GET profiles','GET orders','GET order-query','POST auth','POST logout','POST orders','PATCH order']);
 
 // The bridge accepts visitor actions only. It never forwards platform identity
 // or incoming cookies, so a GitHub visitor cannot inherit a store owner's role.
@@ -17,7 +17,7 @@ export async function githubBridge(req:Request,handle:(request:Request)=>Promise
   const message=JSON.parse(raw);
   if(!message||typeof message!=='object'||Array.isArray(message))return reply({error:'提交内容有误'},400);
   const {path,method,body,token}=message;
-  if(!visitorActions.has(`${method} ${path}`))return reply({error:'此入口只支持点餐和自己的订单'},403);
+  if(!visitorActions.has(`${method} ${path}`))return reply({error:'此入口支持点餐和订单查询'},403);
   if(token!==undefined&&(typeof token!=='string'||!nicknameToken.test(token)))return reply({error:'昵称已失效，请重新选择'},401);
   const url=new URL('/api/'+path,req.url);
   const visitorHeaders=new Headers({'Content-Type':'application/json','Origin':url.origin});
