@@ -3,7 +3,7 @@ declare namespace Cloudflare {
     STANDALONE?: string;
     OWNER_PASSWORD_HASH?: string;
     OWNER_SESSION_KEY?: string;
-    SHOP_MANAGE_URL?: string;
+    ORDER_MAIL_URL?: string;
     ASSETS?: Fetcher;
     DB?: D1Database;
     BUCKET?: R2Bucket;

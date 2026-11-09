@@ -1,5 +1,5 @@
 export type MailShop='tuntun'|'feifei';
-export type OrderMailConfig={EMAILJS_SERVICE_ID?:string;EMAILJS_TEMPLATE_ID?:string;EMAILJS_PUBLIC_KEY?:string;EMAILJS_PRIVATE_KEY?:string;ORDER_MAIL_FROM?:string;ORDER_MAIL_TUNTUN_TO?:string;ORDER_MAIL_FEIFEI_TO?:string;SHOP_MANAGE_URL?:string};
+export type OrderMailConfig={EMAILJS_SERVICE_ID?:string;EMAILJS_TEMPLATE_ID?:string;EMAILJS_PUBLIC_KEY?:string;EMAILJS_PRIVATE_KEY?:string;ORDER_MAIL_FROM?:string;ORDER_MAIL_TUNTUN_TO?:string;ORDER_MAIL_FEIFEI_TO?:string;ORDER_MAIL_URL?:string};
 type MailItem={shop:string;name:string;price:number;quantity:number;options:Record<string,string>};
 type MailOrder={id:string;nickname:string;items:MailItem[];total:number;note:string;created_at:string};
 export const mailShops:MailShop[]=['tuntun','feifei'];
@@ -14,7 +14,9 @@ export function orderMailParams(order:MailOrder,config:OrderMailConfig,shop:Mail
  const lines=items.map(item=>`${item.name} × ${item.quantity}${Object.values(item.options||{}).length?'（'+Object.values(item.options).join(' / ')+'）':''}`);
  const time=new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',dateStyle:'medium',timeStyle:'short',hour12:false}).format(new Date(order.created_at));
  const total=items.reduce((sum,item)=>sum+Math.round(item.price*100)*item.quantity,0);
- return {shop_name:names[shop],from_name:'两人一起 · '+names[shop],from_email:config.ORDER_MAIL_FROM,to_email:recipient(config,shop),subject:`${names[shop]}来新订单啦 · ${orderNumber}`,order_id:order.id,order_number:orderNumber,nickname:order.nickname,ordered_at:time,order_summary:lines.join('\n'),order_note:order.note||'没有特别留言',order_total:`¥${(total/100).toFixed(2)}`,manage_url:config.SHOP_MANAGE_URL||'https://feifei-tuntun-table.wudi0971.chatgpt.site/manage?look=cute'};
+ const orderUrl=new URL(config.ORDER_MAIL_URL||'https://noground.github.io/?look=cute&space=orders');
+ orderUrl.hash='order-'+order.id;
+ return {shop_name:names[shop],from_name:'两人一起 · '+names[shop],from_email:config.ORDER_MAIL_FROM,to_email:recipient(config,shop),subject:`${names[shop]}来新订单啦 · ${orderNumber}`,order_id:order.id,order_number:orderNumber,nickname:order.nickname,ordered_at:time,order_summary:lines.join('\n'),order_note:order.note||'没有特别留言',order_total:`¥${(total/100).toFixed(2)}`,manage_url:orderUrl.href};
 }
 async function sendMail(config:OrderMailConfig,params:ReturnType<typeof orderMailParams>,send:typeof fetch){
  let response:Response;

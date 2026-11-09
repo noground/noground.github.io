@@ -9,7 +9,7 @@
   "workers_dev": true,
   "vars": {
     "STANDALONE": "true",
-    "SHOP_MANAGE_URL": "https://two-little-shops.wudi09711-shops.workers.dev/manage?look=cute"
+    "ORDER_MAIL_URL": "https://noground.github.io/?look=cute&space=orders"
   },
   "d1_databases": [
     {
